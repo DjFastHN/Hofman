@@ -67,7 +67,7 @@ class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
   Widget build(BuildContext context) {
     final isIncomingOnly = bind.isIncomingOnly();
     startServiceWidget() => Offstage(
-          offstage: !_svcStopped.value,
+          offstage: true, // el servicio arranca solo
           child: InkWell(
                   onTap: () async {
                     await start_service(true);
@@ -80,9 +80,7 @@ class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
 
     setupServerWidget() => Flexible(
           child: Offstage(
-            offstage: !(!_svcStopped.value &&
-                stateGlobal.svcStatus.value == SvcStatus.ready &&
-                _svcIsUsingPublicServer.value),
+            offstage: true, // sin enlace a precios de RustDesk
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [

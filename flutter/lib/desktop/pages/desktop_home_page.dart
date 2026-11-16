@@ -701,6 +701,12 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   @override
   void initState() {
     super.initState();
+    // Arranca el servicio solo al abrir el programa (sin botón "Iniciar servicio")
+    Future.microtask(() async {
+      if (await mainGetBoolOption(kOptionStopService)) {
+        await start_service(true);
+      }
+    });
     _updateTimer = periodic_immediate(const Duration(seconds: 1), () async {
       await gFFI.serverModel.fetchID();
       final error = await bind.mainGetError();
