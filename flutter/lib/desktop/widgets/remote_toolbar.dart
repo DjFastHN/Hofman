@@ -836,6 +836,9 @@ class _RemoteToolbarState extends State<RemoteToolbar> {
 
     toolbarItems
         .add(_ControlMenu(id: widget.id, ffi: widget.ffi, state: widget.state));
+    if (widget.ffi.connType == ConnType.defaultConn && !isWeb) {
+      toolbarItems.add(_FileTransferButton(id: widget.id, ffi: widget.ffi));
+    }
     toolbarItems.add(_DisplayMenu(
       id: widget.id,
       ffi: widget.ffi,
@@ -1827,6 +1830,7 @@ class _DisplayMenuState extends State<_DisplayMenu> {
         future: toolbarViewStyle(context, widget.id, widget.ffi),
         hasData: (data) {
           final v = data as List<TRadioMenu<String>>;
+          if (v.isEmpty) return Offstage();
           final bool isCustomSelected = v.isNotEmpty
               ? v.first.groupValue == kRemoteViewStyleCustom
               : false;
@@ -2967,6 +2971,33 @@ class _VoiceCallMenu extends StatelessWidget {
       onPressed: () => bind.sessionCloseVoiceCall(sessionId: ffi.sessionId),
       color: _ToolbarTheme.redColor,
       hoverColor: _ToolbarTheme.hoverRedColor,
+    );
+  }
+}
+
+// Hofman: botón directo de transferir archivos, a la par del rayo
+class _FileTransferButton extends StatelessWidget {
+  final String id;
+  final FFI ffi;
+  const _FileTransferButton({Key? key, required this.id, required this.ffi})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return _IconMenuButton(
+      assetName: 'assets/file_transfer.svg',
+      tooltip: 'Transfer file',
+      onPressed: () {
+        final connToken = bind.sessionGetConnToken(sessionId: ffi.sessionId);
+        connect(context, id,
+            loginMethod: bind.sessionGetCommonSync(
+                    sessionId: ffi.sessionId, key: 'login_method', param: '') ??
+                '',
+            isFileTransfer: true,
+            connToken: connToken);
+      },
+      color: _ToolbarTheme.blueColor,
+      hoverColor: _ToolbarTheme.hoverBlueColor,
     );
   }
 }

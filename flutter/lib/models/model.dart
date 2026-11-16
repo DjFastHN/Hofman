@@ -2383,9 +2383,12 @@ class CanvasModel with ChangeNotifier {
   updateSize() => _size = getSize();
 
   updateViewStyle({refreshMousePos = true, notify = true}) async {
-    final style = await bind.sessionGetViewStyle(sessionId: sessionId);
-    if (style == null) {
-      return;
+    // Hofman: siempre escala adaptativa (pantalla completa ajustada)
+    var style = await bind.sessionGetViewStyle(sessionId: sessionId);
+    if (style != kRemoteViewStyleAdaptive) {
+      await bind.sessionSetViewStyle(
+          sessionId: sessionId, value: kRemoteViewStyleAdaptive);
+      style = kRemoteViewStyleAdaptive;
     }
 
     updateSize();

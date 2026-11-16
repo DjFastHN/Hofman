@@ -590,11 +590,7 @@ List<TTextMenu> toolbarControls(BuildContext context, String id, FFI ffi) {
   }
 
   if (isDefaultConn && isDesktop) {
-    v.add(
-      TTextMenu(
-          child: Text(translate('Transfer file')),
-          onPressed: () => connectWithToken(isFileTransfer: true)),
-    );
+    // Hofman: 'Transfer file' va como botón propio en la barra
     v.add(
       TTextMenu(
           child: Text(translate('View camera')),
@@ -800,37 +796,17 @@ List<TTextMenu> toolbarControls(BuildContext context, String id, FFI ffi) {
   return v;
 }
 
+// Hofman: escala adaptativa fija, sin opciones de escala original/personalizada
 Future<List<TRadioMenu<String>>> toolbarViewStyle(
     BuildContext context, String id, FFI ffi) async {
   final groupValue =
       await bind.sessionGetViewStyle(sessionId: ffi.sessionId) ?? '';
-  void onChanged(String? value) async {
-    if (value == null) return;
-    bind
-        .sessionSetViewStyle(sessionId: ffi.sessionId, value: value)
-        .then((_) => ffi.canvasModel.updateViewStyle());
+  if (groupValue != kRemoteViewStyleAdaptive) {
+    await bind.sessionSetViewStyle(
+        sessionId: ffi.sessionId, value: kRemoteViewStyleAdaptive);
+    await ffi.canvasModel.updateViewStyle();
   }
-
-  return _registerRadioMenuShortcuts(ffi, [
-    TRadioMenu<String>(
-        child: Text(translate('Scale original')),
-        value: kRemoteViewStyleOriginal,
-        groupValue: groupValue,
-        onChanged: onChanged,
-        actionId: kShortcutActionViewModeOriginal),
-    TRadioMenu<String>(
-        child: Text(translate('Scale adaptive')),
-        value: kRemoteViewStyleAdaptive,
-        groupValue: groupValue,
-        onChanged: onChanged,
-        actionId: kShortcutActionViewModeAdaptive),
-    TRadioMenu<String>(
-        child: Text(translate('Scale custom')),
-        value: kRemoteViewStyleCustom,
-        groupValue: groupValue,
-        onChanged: onChanged,
-        actionId: kShortcutActionViewModeCustom)
-  ], ownedActionIds: _kToolbarViewStyleActionIds);
+  return <TRadioMenu<String>>[];
 }
 
 Future<List<TRadioMenu<String>>> toolbarImageQuality(
