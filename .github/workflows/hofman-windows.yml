@@ -280,7 +280,9 @@ jobs:
           sed -i '/dpiAware/d' res/manifest.xml
           pushd ./libs/portable
           pip3 install -r requirements.txt
-          python3 ./generate.py -f ../../rustdesk/ -o . -e ../../rustdesk/rustdesk.exe
+          # el instalador espera que el ejecutable ya se llame como la app (Hofman.exe)
+          mv ../../rustdesk/rustdesk.exe ../../rustdesk/Hofman.exe
+          python3 ./generate.py -f ../../rustdesk/ -o . -e ../../rustdesk/Hofman.exe
           popd
           mkdir -p ./out
           mv ./target/release/rustdesk-portable-packer.exe ./out/Hofman-Setup.exe
