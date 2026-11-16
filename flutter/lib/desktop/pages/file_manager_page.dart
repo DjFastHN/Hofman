@@ -490,6 +490,7 @@ class _FileManagerViewState extends State<FileManagerView> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                _buildQuickAccess(context),
                 Expanded(
                     child: MouseRegion(
                   onEnter: (evt) {
@@ -1224,24 +1225,8 @@ class _FileManagerViewState extends State<FileManagerView> {
                                       waitDuration: Duration(milliseconds: 500),
                                       message: entry.name,
                                       child: Row(children: [
-                                        entry.isDrive
-                                            ? Image(
-                                                    image: iconHardDrive,
-                                                    fit: BoxFit.scaleDown,
-                                                    color: Theme.of(context)
-                                                        .iconTheme
-                                                        .color
-                                                        ?.withOpacity(0.7))
-                                                .paddingAll(4)
-                                            : SvgPicture.asset(
-                                                entry.isFile
-                                                    ? "assets/file.svg"
-                                                    : "assets/folder.svg",
-                                                colorFilter: svgColor(
-                                                    Theme.of(context)
-                                                        .tabBarTheme
-                                                        .labelColor),
-                                              ),
+                                        _classicIcon(entry).paddingOnly(
+                                            left: 2, right: 6),
                                         Expanded(
                                             child: Text(entry.name.nonBreaking,
                                                 style: TextStyle(
@@ -1606,6 +1591,97 @@ class _FileManagerViewState extends State<FileManagerView> {
         return Rx<bool?>(null);
       }
     }());
+  }
+
+  // Hofman: iconos clásicos (discos, carpetas amarillas, archivos por tipo)
+  Widget _classicIcon(Entry entry) {
+    if (entry.isDrive) {
+      return Icon(Icons.storage_rounded, size: 22, color: Color(0xFF607D8B));
+    }
+    if (!entry.isFile) {
+      return Icon(Icons.folder_rounded, size: 22, color: Color(0xFFF4B400));
+    }
+    final n = entry.name.toLowerCase();
+    final ext = n.contains('.') ? n.substring(n.lastIndexOf('.') + 1) : '';
+    const img = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'ico', 'svg'];
+    const aud = ['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a', 'wma'];
+    const vid = ['mp4', 'mkv', 'avi', 'mov', 'wmv', 'flv', 'webm', 'ts'];
+    const doc = ['doc', 'docx', 'txt', 'rtf', 'odt', 'pdf', 'xls', 'xlsx',
+      'csv', 'ppt', 'pptx'];
+    const zip = ['zip', 'rar', '7z', 'tar', 'gz'];
+    const app = ['exe', 'msi', 'bat', 'cmd'];
+    if (img.contains(ext)) {
+      return Icon(Icons.image_rounded, size: 22, color: Color(0xFF34A853));
+    } else if (aud.contains(ext)) {
+      return Icon(Icons.audio_file_rounded, size: 22, color: Color(0xFF9C27B0));
+    } else if (vid.contains(ext)) {
+      return Icon(Icons.video_file_rounded, size: 22, color: Color(0xFFE53935));
+    } else if (ext == 'pdf') {
+      return Icon(Icons.picture_as_pdf_rounded,
+          size: 22, color: Color(0xFFD32F2F));
+    } else if (doc.contains(ext)) {
+      return Icon(Icons.description_rounded, size: 22, color: Color(0xFF1E88E5));
+    } else if (zip.contains(ext)) {
+      return Icon(Icons.folder_zip_rounded, size: 22, color: Color(0xFF8D6E63));
+    } else if (app.contains(ext)) {
+      return Icon(Icons.apps_rounded, size: 22, color: Color(0xFF00897B));
+    }
+    return Icon(Icons.insert_drive_file_rounded,
+        size: 22, color: Color(0xFF90A4AE));
+  }
+
+  // Hofman: panel de acceso rápido estilo explorador clásico
+  Widget _buildQuickAccess(BuildContext context) {
+    return Obx(() {
+      controller.directory.value; // se redibuja al navegar (home ya cargado)
+      final isWin = controller.options.value.isWindows;
+      final home = controller.options.value.home;
+      Widget item(IconData icon, Color color, String label, String path) {
+        return InkWell(
+          borderRadius: BorderRadius.circular(6),
+          onTap: () => controller.openDirectory(path),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+            child: Row(children: [
+              Icon(icon, size: 20, color: color),
+              SizedBox(width: 8),
+              Expanded(
+                  child: Text(label,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 13))),
+            ]),
+          ),
+        );
+      }
+
+      String sub(String name) =>
+          home.isEmpty ? home : PathUtil.join(home, name, isWin);
+      final folder = Color(0xFFF4B400);
+      return Container(
+        width: 150,
+        margin: EdgeInsets.only(right: 8),
+        padding: EdgeInsets.symmetric(vertical: 6),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: ListView(children: [
+          if (isWin)
+            item(Icons.computer_rounded, Color(0xFF1E5BFF), 'Este equipo', '/'),
+          item(Icons.home_rounded, Color(0xFF1E5BFF), 'Inicio', home),
+          if (home.isNotEmpty) ...[
+            item(Icons.desktop_windows_rounded, Color(0xFF1E88E5), 'Escritorio',
+                sub('Desktop')),
+            item(Icons.folder_rounded, folder, 'Documentos', sub('Documents')),
+            item(Icons.download_rounded, Color(0xFF34A853), 'Descargas',
+                sub('Downloads')),
+            item(Icons.image_rounded, folder, 'Imágenes', sub('Pictures')),
+            item(Icons.music_note_rounded, folder, 'Música', sub('Music')),
+            item(Icons.movie_rounded, folder, 'Videos', sub('Videos')),
+          ],
+        ]),
+      );
+    });
   }
 
   Widget buildBread() {
