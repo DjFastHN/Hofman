@@ -1766,7 +1766,9 @@ copy /Y \"{tmp_path}\\{app_name} Tray.lnk\" \"%PROGRAMDATA%\\Microsoft\\Windows\
         Some(reg_value_printer),
     );
     let after_install = native_after_install_commands(
-        format!("{after_install}\r\n{install_remote_printer}"),
+        // Hofman: la impresora remota puede terminar con un código distinto de 0 aunque funcione;
+        // el instalador toma el último código del script como resultado, así que lo dejamos en 0.
+        format!("{after_install}\r\n{install_remote_printer}\r\ncmd /c \"exit /b 0\""),
         &exe,
         true,
     )?;
@@ -4201,7 +4203,7 @@ pub fn message_box(text: &str) {
         .encode_utf16()
         .chain(std::iter::once(0))
         .collect::<Vec<u16>>();
-    let caption = "RustDesk Output"
+    let caption = "Hofman"
         .encode_utf16()
         .chain(std::iter::once(0))
         .collect::<Vec<u16>>();
