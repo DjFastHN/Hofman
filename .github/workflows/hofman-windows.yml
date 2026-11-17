@@ -8,6 +8,9 @@ on:
     paths-ignore:
       - "docs/**"
       - "README.md"
+      - "flutter/android/**"
+      - "flutter/lib/mobile/**"
+      - ".github/workflows/hofman-android.yml"
 
 permissions:
   contents: write

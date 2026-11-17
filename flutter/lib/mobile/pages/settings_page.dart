@@ -38,7 +38,7 @@ class SettingsPage extends StatefulWidget implements PageShape {
   State<SettingsPage> createState() => _SettingsState();
 }
 
-const url = 'https://rustdesk.com/';
+const url = 'https://github.com/DjFastHN/hofman';
 
 enum KeepScreenOn {
   never,
@@ -1066,7 +1066,7 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
                 title: Text('${translate('Version')}: $version'),
                 value: Padding(
                   padding: EdgeInsets.symmetric(vertical: 8),
-                  child: Text('rustdesk.com',
+                  child: Text('Hofman — By Hofman Valle',
                       style: TextStyle(
                         decoration: TextDecoration.underline,
                       )),
@@ -1207,17 +1207,19 @@ void showThemeSettings(OverlayDialogManager dialogManager) async {
 void showAbout(OverlayDialogManager dialogManager) {
   dialogManager.show((setState, close, context) {
     return CustomAlertDialog(
-      title: Text(translate('About RustDesk')),
+      title: Text('Acerca de Hofman'),
       content: Wrap(direction: Axis.vertical, spacing: 12, children: [
         Text('Version: $version'),
+        Text('Hofman — By Hofman Valle'),
+        Text('Basado en RustDesk · Licencia GNU AGPL-3.0'),
         InkWell(
             onTap: () async {
-              const url = 'https://rustdesk.com/';
+              const url = 'https://github.com/DjFastHN/hofman';
               await launchUrl(Uri.parse(url));
             },
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 8),
-              child: Text('rustdesk.com',
+              child: Text('github.com/DjFastHN/hofman',
                   style: TextStyle(
                     decoration: TextDecoration.underline,
                   )),
